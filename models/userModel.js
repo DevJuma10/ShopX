@@ -37,6 +37,10 @@ userSchema.pre('save', async function(next){
     this.password = bcrypt.hashSync(this.password, salt)
 })
 
+userSchema.methods.isPasswordMatched = async function(enteredPassword){
+    return await bcrypt.compare(enteredPassword, this.password)
+}
+
 
 
 //Export the model
