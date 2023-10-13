@@ -32,15 +32,16 @@ const createUser = asyncHandler( async (req, res) => {
 
 
 
-const loginUser = asyncHandler( async ( req, res) => {
+const loginUser = asyncHandler ( async ( req, res) => {
 
     const {email, password} = req.body;
    // check if user exits
    const findUser = await User.findOne({email})
+
    if(findUser && findUser.isPasswordMatched(password)) {
         res.status(200).json({
-            ...findUser,
-            token: generateToken(findUser?._id)
+            ...findUser.toObject(),
+            token: await generateToken(findUser?._id)
         })
    } else {
     throw new Error ("Invalid Credentials")
@@ -48,6 +49,7 @@ const loginUser = asyncHandler( async ( req, res) => {
 
 } )
 
+  
 
 module.exports = { createUser, loginUser }
 
