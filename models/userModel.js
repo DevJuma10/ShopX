@@ -18,7 +18,8 @@ const userSchema = new mongoose.Schema({
     email:{
         type:String,
         required:true,
-        unique:[true,'User with that email exists']
+        unique:[true,'User with that email exists'],
+        lowercase: true
     },
     mobile:{
         type:String,
@@ -29,6 +30,11 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
+    role:{
+        type: String,
+        enum:['admin', 'user'],
+        default:'user'
+    }
 });
 
 

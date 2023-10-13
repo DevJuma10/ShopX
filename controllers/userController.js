@@ -33,7 +33,6 @@ const createUser = asyncHandler( async (req, res) => {
 
 
 const loginUser = asyncHandler ( async ( req, res) => {
-
     const {email, password} = req.body;
    // check if user exits
    const findUser = await User.findOne({email})
