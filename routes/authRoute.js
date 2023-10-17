@@ -1,5 +1,5 @@
 const express = require('express');
-const { createUser, loginUser, getAllUsers, getUser, deleteUser } = require('../controllers/userController');
+const { createUser, loginUser, getAllUsers, getUser, deleteUser, updateUser } = require('../controllers/userController');
 const router = express.Router();
 
 
@@ -12,6 +12,7 @@ router.post('/login', loginUser)
 router.get('/all-users', getAllUsers);
 router.get('/:id', getUser)
 router.delete('/:id', deleteUser)
+router.put('/:id', updateUser)
 
 
 
