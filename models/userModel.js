@@ -34,8 +34,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum:['admin', 'user'],
         default:'user'
-    }
-});
+    },
+    active:{
+        type: Boolean,
+        default: true,
+        select: false
+    }, 
+    cart:{
+        type: Array,
+        default: []
+    },
+    address: [{type: mongoose.Schema.Types.ObjectId, ref: "Address"}],
+    wishlist: [{ type:  mongoose.Schema.Types.ObjectId, ref: "Product"}]
+}, 
+{ timestamps: true});
 
 
 userSchema.pre('save', async function(next){
