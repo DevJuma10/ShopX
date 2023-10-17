@@ -50,14 +50,36 @@ const loginUser = asyncHandler ( async ( req, res) => {
 
 
 
-
+// Fetch all users
 
 const getAllUsers = asyncHandler(async (req, res) => {
-    const allUsers = await User.find()
-    res.status(200).json({
+    try {
+        const allUsers = await User.find()
+        res.status(200).json({
         status:'sucess',
         data: allUsers
     })
+    } catch (error) {
+        throw new Error(error)
+    }
+})
+
+
+// Fetch a single user
+const getUser = asyncHandler(async (req, res) => {
+    try {
+        const { id } = req.params
+        const getUser = await User.findById( id )
+        res.status(200).json({
+            status: 'sucess',
+            data: getUser
+        })
+       
+
+    } catch (error) {
+        throw new Error(error)
+        
+    }
 })
 
 
@@ -66,9 +88,11 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
 
 
-
-
-
-
-module.exports = { createUser, loginUser , getAllUsers }
+module.exports = { 
+                    createUser, 
+                    loginUser , 
+                    getAllUsers,
+                    getUser 
+                
+                }
 

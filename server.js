@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: false}))
 app.use(bodyParser.json())
 
 
-app.use('/api/user', authRouter);
+app.use('/api/users', authRouter);
 
 
 // Error Handling middlewares
