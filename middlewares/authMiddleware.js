@@ -14,7 +14,7 @@ const authMiddleware = asyncHandler( async ( req, res, next ) => {
                     console.log(decodedToken)
                     const user = await User.findById({_id: decodedToken?.id})
                     req.user = user
-                    next()
+                    
                 } catch(error) {
                     console.log(error)
                 }
@@ -31,10 +31,7 @@ const authMiddleware = asyncHandler( async ( req, res, next ) => {
     next()
 })
 
-// const authMiddleware = asyncHandler(async (req, res, next) => {
-//     console.log(req.headers); // Log the request headers
-//    next()
-//   });
+
   
 
 
