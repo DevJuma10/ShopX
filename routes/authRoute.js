@@ -10,7 +10,7 @@ router.post('/login', loginUser)
 
 
 // OTHER ROUTES
-router.get('/all-users',authMiddleware, getAllUsers);
+router.get('/all-users',authMiddleware, isAdmin, getAllUsers);
 router.get('/:id', getUser)
 router.delete('/:id', deleteUser)
 router.put('/:id', updateUser)
