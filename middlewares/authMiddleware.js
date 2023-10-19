@@ -9,12 +9,15 @@ const authMiddleware = asyncHandler( async ( req, res, next ) => {
         
         try {
             if (token) {
-                console.log(token)
-                const decodedToken = await  jwt.verify(token, 'defaultSecret')
-                console.log(decodedToken)
-                const user = await User.findById({_id: decodedToken?.id})
-                req.user = user
-                next()
+                try{
+                    const decodedToken = jwt.verify(token, 'defaultSecret')
+                    console.log(decodedToken)
+                    const user = await User.findById({_id: decodedToken?.id})
+                    req.user = user
+                    next()
+                } catch(error) {
+                    console.log(error)
+                }
             }
             
         } catch (error) {
