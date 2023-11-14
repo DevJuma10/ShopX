@@ -122,6 +122,44 @@ const updateUser = asyncHandler( async ( req, res ) => {
 
 })
 
+const blockUser = asyncHandler(  async  (req, res) => {
+    const id   = req.params.id
+    
+    try {
+       const user =  await User.findByIdAndUpdate(id   ,   {
+            isBlocked:true
+        },
+        {new: true})
+        console.log(user)
+
+        res.status(200).json({
+            message: 'user blocked',
+        })
+
+    } catch (error) {
+        throw new Error(error)
+    }
+} )
+
+const unblockUser = asyncHandler(  async  (req, res) => {
+    const id   = req.params.id
+    
+    try {
+       const user =  await User.findByIdAndUpdate(id   ,   {
+            isBlocked:false
+        },
+        {new: true})
+        console.log(user)
+
+        res.status(200).json({
+            message: 'user unblocked',
+        })
+
+    } catch (error) {
+        throw new Error(error)
+    }
+} )
+
 
 
 
@@ -131,7 +169,9 @@ module.exports = {
                     getAllUsers,
                     getUser,
                     deleteUser,
-                    updateUser
+                    updateUser,
+                    blockUser,
+                    unblockUser
                 
                 }
 

@@ -40,6 +40,10 @@ const userSchema = new mongoose.Schema({
         default: true,
         select: false
     }, 
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
     cart:{
         type: Array,
         default: []
