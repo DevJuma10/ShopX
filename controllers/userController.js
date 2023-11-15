@@ -1,4 +1,6 @@
 const { generateToken } = require('../config/jwtToken');
+const { generateRefreshToken } = require('../config/refreshToken')
+const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 const asyncHandler = require('express-async-handler')
 const validateMongoDbId = require('../utils/validateMongoDbId')
@@ -39,6 +41,18 @@ const loginUser = asyncHandler ( async ( req, res) => {
    const findUser = await User.findOne({email})
 
    if(findUser && findUser.isPasswordMatched(password)) {
+    const refreshToken = await generateRefreshToken(findUser?._id);
+    const updateUser = await User.findByIdAndUpdate(findUser.id,
+         {
+            refreshToken: refreshToken
+    }, 
+    {new: true})
+
+    res.cookie('refreshToken', refreshToken, {
+
+        httpOnly: true,
+        maxAge:72*60*60*1000
+    })
         res.status(200).json({
             ...findUser.toObject(),
             token: await generateToken(findUser?._id)
@@ -167,6 +181,145 @@ const unblockUser = asyncHandler(  async  (req, res) => {
     }
 } )
 
+// const handleRefreshToken = asyncHandler(async (req, res) => {
+//     const cookie = req.cookies;
+//     if (!cookie?.refreshToken) throw new Error("No Refresh Token in Cookies");
+//     const refreshToken = cookie.refreshToken;
+//     const user = await User.findOne({ refreshToken });
+//     if (!user) throw new Error(" No Refresh token present in db or not matched");
+//     jwt.verify(refreshToken, 'defaultSecret', (err, decoded) => {
+//       if (err || user.id !== decoded.id) {
+//         throw new Error("There is something wrong with refresh token");
+//       }
+//       const accessToken = generateToken(user?._id);
+//       res.json({ accessToken });
+//     });
+//   });
+
+
+const handleRefreshToken = asyncHandler ( async (req, res, next) => {
+    // check for refresh token in cookies
+    const cookie = req.cookies;
+    if (!cookie.refreshToken){
+        throw new Error("Not Found| No Refresh token in cookies")
+
+    } 
+    // use the token to find authenticated user
+    const refreshToken = cookie.refreshToken
+    const user = await User.findOne({refreshToken})
+    if(!user)throw new Error('Unauthorized | Invalid Token')
+
+    const decodedToken = jwt.verify(refreshToken, 'defaultSecret');
+    if(user._id != decodedToken.id )throw new Error ('There is something wrong with the refresh token')            
+       
+    // generate a new access token and save it on the users document
+     const accessToken = await generateRefreshToken(user?.id).then((result) => {
+        return result;
+    })
+
+    res.cookie('refreshToken', accessToken, {
+
+        httpOnly: true,
+        maxAge:72*60*60*1000
+    })
+
+    // Update the users document with the new access token
+    const updatedUser = await User.findByIdAndUpdate(user.id, {
+                refreshToken: accessToken
+            }, {new:true})
+
+            console.log(updateUser)
+
+
+            res.status(200).json({
+                message: 'success',
+                data:updatedUser
+                
+            })
+        } )
+
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const handleRefreshToken = asyncHandler ( async (req, res) => {
+//     const cookie = req.cookies
+//     if(!cookie?.refreshToken){
+//         throw new Error("No Refrsh Token in cookies")
+//     }
+//     const refreshToken = cookie.refreshToken
+//     const user = await User.findOne({refreshToken})
+//     if (!user) {
+//         throw new Error('Invalid Refresh token')
+//     }
+//     jwt.verify(refreshToken, 'defaultSecret', (err, decoded) => {
+
+//         if (err || user.id !== decoded.id) {
+//             throw new Error('There\'s Something wrong with the refresh token')
+//         }
+//         // generate a new access token and send it to the client
+//         const accessToken =  generateToken(user?.id);
+//         console.log(accessToken)
+        
+        
+//         res.json({accessToken})
+
+//     })
+
+// })
+
+// const handleRefreshToken = asyncHandler(async (req, res) => {
+//     const cookie = req.cookies;
+//     if (!cookie?.refreshToken) {
+//         throw new Error("No Refresh Token in cookies");
+//     }
+
+//     const refreshToken = cookie.refreshToken;
+//     const user = await User.findOne({ refreshToken });
+
+//     if (!user) {
+//         throw new Error('Invalid Refresh token');
+//     }
+
+//     try {
+//         const decoded = await jwt.verify(refreshToken, 'defaultSecret');
+
+//         if (user.id !== decoded.id) {
+//             throw new Error('There\'s Something wrong with the refresh token');
+//         }
+
+//         // generate a new access token and send it to the client
+//         const accessToken = generateToken(user?.id);
+//         console.log(accessToken);
+
+//         res.json({ accessToken });
+//     } catch (err) {
+//         // Handle errors from jwt.verify
+//         console.error(err);
+//         res.status(401).json({ error: 'Invalid refresh token' });
+//     }
+// });
 
 
 
@@ -178,7 +331,8 @@ module.exports = {
                     deleteUser,
                     updateUser,
                     blockUser,
-                    unblockUser
+                    unblockUser,
+                    handleRefreshToken
                 
                 }
 
