@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 4000;
 
 const dbConnect = require('./config/dbConnect')
 const authRouter = require('./routes/authRoute');
+const productRouter = require('./routes/productRoute')
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 dbConnect();
@@ -18,6 +19,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 app.use('/api/users', authRouter);
+app.use('/api/products', productRouter);
+
 
 
 // Error Handling middlewares
