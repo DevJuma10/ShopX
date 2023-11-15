@@ -228,8 +228,6 @@ const handleRefreshToken = asyncHandler ( async (req, res, next) => {
                 refreshToken: accessToken
             }, {new:true})
 
-            console.log(updateUser)
-
 
             res.status(200).json({
                 message: 'success',
@@ -240,7 +238,24 @@ const handleRefreshToken = asyncHandler ( async (req, res, next) => {
 
     
     
+// Handle logout functionality
+const logout = asyncHandler( async (req, res) => {
+    const cookies = req.cookies;
+    if(!cookies.refreshToken) throw new Error (" Not Found | No refresh token in cookies")
+    const refreshToken = cookies.refreshToken;
+    const user = await User.findOneAndUpdate({refreshToken},
+        {refreshToken:""});
+    //clear cookies
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: true
+    });
+
+    res.status(204).json({
+        message: "User Logged Out"
+    })
     
+})
 
 
 
@@ -263,63 +278,7 @@ const handleRefreshToken = asyncHandler ( async (req, res, next) => {
 
 
 
-// const handleRefreshToken = asyncHandler ( async (req, res) => {
-//     const cookie = req.cookies
-//     if(!cookie?.refreshToken){
-//         throw new Error("No Refrsh Token in cookies")
-//     }
-//     const refreshToken = cookie.refreshToken
-//     const user = await User.findOne({refreshToken})
-//     if (!user) {
-//         throw new Error('Invalid Refresh token')
-//     }
-//     jwt.verify(refreshToken, 'defaultSecret', (err, decoded) => {
 
-//         if (err || user.id !== decoded.id) {
-//             throw new Error('There\'s Something wrong with the refresh token')
-//         }
-//         // generate a new access token and send it to the client
-//         const accessToken =  generateToken(user?.id);
-//         console.log(accessToken)
-        
-        
-//         res.json({accessToken})
-
-//     })
-
-// })
-
-// const handleRefreshToken = asyncHandler(async (req, res) => {
-//     const cookie = req.cookies;
-//     if (!cookie?.refreshToken) {
-//         throw new Error("No Refresh Token in cookies");
-//     }
-
-//     const refreshToken = cookie.refreshToken;
-//     const user = await User.findOne({ refreshToken });
-
-//     if (!user) {
-//         throw new Error('Invalid Refresh token');
-//     }
-
-//     try {
-//         const decoded = await jwt.verify(refreshToken, 'defaultSecret');
-
-//         if (user.id !== decoded.id) {
-//             throw new Error('There\'s Something wrong with the refresh token');
-//         }
-
-//         // generate a new access token and send it to the client
-//         const accessToken = generateToken(user?.id);
-//         console.log(accessToken);
-
-//         res.json({ accessToken });
-//     } catch (err) {
-//         // Handle errors from jwt.verify
-//         console.error(err);
-//         res.status(401).json({ error: 'Invalid refresh token' });
-//     }
-// });
 
 
 
@@ -332,7 +291,8 @@ module.exports = {
                     updateUser,
                     blockUser,
                     unblockUser,
-                    handleRefreshToken
+                    handleRefreshToken,
+                    logout
                 
                 }
 
