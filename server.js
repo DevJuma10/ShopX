@@ -3,6 +3,7 @@ const app = express()
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 require('dotenv').config
+const morgan = require('morgan')
 const PORT = process.env.PORT || 4000;
 
 const dbConnect = require('./config/dbConnect')
@@ -11,6 +12,7 @@ const productRouter = require('./routes/productRoute')
 const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 dbConnect();
+app.use(morgan('dev'))
 
 
 
