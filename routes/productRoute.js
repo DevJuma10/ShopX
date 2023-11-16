@@ -6,11 +6,11 @@ isAdmin
 
 
 
-router.post('/create-product', isAdmin, authMiddleware, createProduct)
+router.post('/create-product',authMiddleware, isAdmin,  createProduct)
 router.get('/all-products', getAllProducts)
-router.put('/:id',isAdmin, authMiddleware, updateProduct )
+router.put('/update-product/:id',authMiddleware, isAdmin,  updateProduct )
 router.get('/:id', getProduct )
-router.delete('/:id',isAdmin, authMiddleware, deleteProduct )
+router.delete('/:id', authMiddleware, isAdmin,  deleteProduct )
 
 
 
