@@ -48,7 +48,7 @@ const getAllProducts = asyncHandler (async ( req, res ) => {
         query = query.sort('-createdAt')
     }
 
-    // LIMITING
+    // PAGIINATION
     const page = parseInt(req.query.page)
     const limit = parseInt(req.query.limit)
     const startIndex = (page -1) * limit
@@ -59,14 +59,17 @@ const getAllProducts = asyncHandler (async ( req, res ) => {
     if(req.query.page &&  startIndex  >=  total){
         throw new Error("Not Found|Page doesn't exist")
     }
-
-
-  
-
-
-
-
- 
+    // LIMITING  FIELDS
+    if(req.query.fields){
+        const fields = req.query.fields.split(',').join(' ')
+        query = query.select(fields)
+        } else {
+        query = query.select('-__v')
+        }
+    
+        
+        
+        //  EXECUTING QUERY
     const products =  await query
     if(!products){
         return res.status(404).send('No products found');

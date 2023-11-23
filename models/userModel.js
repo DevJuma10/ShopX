@@ -52,12 +52,19 @@ const userSchema = new mongoose.Schema({
     wishlist: [{ type:  mongoose.Schema.Types.ObjectId, ref: "Product"}],
     refreshToken: {
         type: String
-    }
-}, 
+    },
+    passwordChangedAt: Date,
+    paswordResetToken: String,
+    passwordResetExpires: Date,
+                         
+},
 { timestamps: true});
 
 
 userSchema.pre('save', async function(next){
+    if(!this.isModified.password){
+        next()
+    }
     const salt = bcrypt.genSaltSync(process.env.SALT_ROUNDS)
     this.password = bcrypt.hashSync(this.password, salt)
 })
@@ -66,6 +73,18 @@ userSchema.methods.isPasswordMatched = async function(enteredPassword){
     return await bcrypt.compare(enteredPassword, this.password)
 }
 
+userSchema.methods.createPasswordResetToken = async function(){
+    const resetToken = crypto.randomBytes(32)
+        .toString('hex')
+
+   this.passwordResetToken  = crypto.createHash('sha256')
+        .update(resetToken)
+        .digest('hex')
+
+    this.passwordResetExpires = Date.now() +  30  +  60 +  1000 //10  minutes
+    return resetToken
+
+}
 
 
 //Export the model

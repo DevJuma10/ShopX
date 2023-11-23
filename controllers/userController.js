@@ -34,7 +34,7 @@ const createUser = asyncHandler( async (req, res) => {
 
 
 
-
+// TODO: Implement  a  password  check
 const loginUser = asyncHandler ( async ( req, res) => {
     const {email, password} = req.body;
    // check if user exits
@@ -93,6 +93,7 @@ const getUser = asyncHandler(async (req, res) => {
        
 
     } catch (error) {
+
         throw new Error(error)
         
     }
@@ -181,20 +182,6 @@ const unblockUser = asyncHandler(  async  (req, res) => {
     }
 } )
 
-// const handleRefreshToken = asyncHandler(async (req, res) => {
-//     const cookie = req.cookies;
-//     if (!cookie?.refreshToken) throw new Error("No Refresh Token in Cookies");
-//     const refreshToken = cookie.refreshToken;
-//     const user = await User.findOne({ refreshToken });
-//     if (!user) throw new Error(" No Refresh token present in db or not matched");
-//     jwt.verify(refreshToken, 'defaultSecret', (err, decoded) => {
-//       if (err || user.id !== decoded.id) {
-//         throw new Error("There is something wrong with refresh token");
-//       }
-//       const accessToken = generateToken(user?._id);
-//       res.json({ accessToken });
-//     });
-//   });
 
 
 const handleRefreshToken = asyncHandler ( async (req, res, next) => {
@@ -258,7 +245,29 @@ const logout = asyncHandler( async (req, res) => {
 })
 
 
+// Handle update password
+const updatePassword = asyncHandler ( async (req, res) => {
+    try {
+        
+    const {password, newPassword} = req.body;
+    const findUser = await User.findById(req.user.id);
 
+    if(!findUser) throw new Error ("User not found")
+
+    const isMatch = await findUser.isPasswordMatched(password);
+
+    if(!isMatch) throw new Error ("Password is incorrect")
+    findUser.password = newPassword;
+    await findUser.save();
+    res.status(200).json({
+        message: "Password Updated"
+    })
+
+
+    } catch (error) {
+        throw new Error(error)
+    }
+})
 
 
 
@@ -292,7 +301,8 @@ module.exports = {
                     blockUser,
                     unblockUser,
                     handleRefreshToken,
-                    logout
+                    logout,
+                    updatePassword
                 
                 }
 
