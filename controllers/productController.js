@@ -29,7 +29,21 @@ const createProduct = asyncHandler( async (req,res) => {
 
 
 const getAllProducts = asyncHandler (async ( req, res ) => {
-    const products =  await Product.find()
+    try {
+
+        //  FILTERING
+    const queryObj = {...req.query}
+    const excludedFields = ['sort', 'page','fields','limit']
+    excludedFields.forEach((el) => delete queryObj[el] )
+
+    let  queryStr = JSON.stringify(queryObj)
+    queryStr =  queryStr.replace(/\b(gte|gt|lte|lt)\b/g,  (match)  => `$${match}`)
+    queryStr = JSON.parse(queryStr)
+
+
+
+    console.log(queryObj)
+    const products =  await Product.find(queryStr)
     if(!products){
         return res.status(404).send('No products found');
         }
@@ -38,6 +52,10 @@ const getAllProducts = asyncHandler (async ( req, res ) => {
             count   : products.length ,
             data    : products
         });
+        
+    } catch (error) {
+        throw new  Error(error)
+    }
         });
 
 

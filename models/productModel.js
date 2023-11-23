@@ -20,6 +20,9 @@ var productSchema = new mongoose.Schema({
         type:Number,
         required:true,
     },
+    brand:{
+        type:String,
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref:"Category"
@@ -51,7 +54,8 @@ var productSchema = new mongoose.Schema({
     ],
     sold:{
         type:Number,
-        default:0
+        default:0,
+        select: false
     }
 }, {timestamps: true});
 
