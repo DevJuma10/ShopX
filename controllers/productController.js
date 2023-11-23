@@ -48,6 +48,23 @@ const getAllProducts = asyncHandler (async ( req, res ) => {
         query = query.sort('-createdAt')
     }
 
+    // LIMITING
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
+    const startIndex = (page -1) * limit
+    const endIndex = page * limit
+    const total = await Product.countDocuments()
+    query = query.skip(startIndex).limit(limit)
+
+    if(req.query.page &&  startIndex  >=  total){
+        throw new Error("Not Found|Page doesn't exist")
+    }
+
+
+  
+
+
+
 
  
     const products =  await query
