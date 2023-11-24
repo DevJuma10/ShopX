@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 const asyncHandler = require('express-async-handler')
 const validateMongoDbId = require('../utils/validateMongoDbId')
+const  sendEmail = require('../controllers/emailController')
+const  crypto = require('crypto')
 
 
 const createUser = asyncHandler( async (req, res) => {
@@ -270,11 +272,67 @@ const updatePassword = asyncHandler ( async (req, res) => {
 })
 
 
+// FORGOT PASSWORD TOKEN HANDLER
+const forgotPasswordToken = asyncHandler (async (req,res)=>{
+    const { email } = req.body;
+    let user = await User.findOne({email});
+    if (!user){
+        throw new Error ("User not found")
+    }
+    try {
+        
+        const token = await user.createPasswordResetToken();
+        await user.save()
 
+        const resetURL = `Please follow this link to reset your password. This link is valid for only 10 minutes. <a  href="http://localhost:4000/api/users/reset-password/${token}">Click Here</a> `
 
+        const data = {
+            to:email,
+            subject:"Forgot & Reset Password",
+            text:"Hello User",
+            html:resetURL,
+        }
+        console.log(data)
 
+        sendEmail(data)
+    
+        res.json(token)
 
+    } catch (error) {
+        throw new Error(error)
+    }
 
+})
+
+//  RESET PASSWORD
+const  resetPassword  = asyncHandler (async (req, res) =>  {
+    const  {resetToken}  = req.params;
+    const { password } = req.body;
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");    
+    console.log(hashedToken)
+    try {
+        
+        const user = await User.findOne({
+            passwordResetToken:  hashedToken,
+            passwordResetExpires: {$gt: Date.now()}
+        });
+
+        if (!user) {
+            throw new Error ("Invalid Token or Expired  Token")
+        }
+        user.password = password;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+
+        await user.save();
+
+        res.json(user);
+
+    } catch (error) {
+        throw new Error(error)
+        
+    }
+})
 
 
 
@@ -302,7 +360,9 @@ module.exports = {
                     unblockUser,
                     handleRefreshToken,
                     logout,
-                    updatePassword
+                    updatePassword,
+                    forgotPasswordToken,
+                    resetPassword
                 
                 }
 
